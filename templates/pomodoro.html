@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pomodoro Timer - AI Study Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .timer-display {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+        .timer-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .session-type {
+            font-size: 1.5rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">AI Study Planner</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Pomodoro Timer</h3>
+                </div>
+                <div class="card-body timer-container">
+                    <div class="session-type" id="sessionType">Ready to Start</div>
+                    <div class="timer-display" id="timerDisplay">25:00</div>
+                    <div class="mt-4">
+                        <button class="btn btn-primary btn-lg me-2" id="startBtn" onclick="startTimer()">Start</button>
+                        <button class="btn btn-secondary btn-lg me-2" id="pauseBtn" onclick="pauseTimer()" disabled>Pause</button>
+                        <button class="btn btn-danger btn-lg" id="resetBtn" onclick="resetTimer()">Reset</button>
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn btn-success" id="breakBtn" onclick="startBreak()" disabled>Start Break</button>
+                    </div>
+                    <div class="mt-4">
+                        <label>Work Duration (minutes):</label>
+                        <input type="number" id="workDuration" value="25" min="1" max="60" class="form-control d-inline-block w-auto mx-2">
+                        <label>Break Duration (minutes):</label>
+                        <input type="number" id="breakDuration" value="5" min="1" max="30" class="form-control d-inline-block w-auto mx-2">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let timerInterval = null;
+let timeRemaining = 25 * 60; // 25 minutes in seconds
+let isRunning = false;
+let isBreak = false;
+
+function updateDisplay() {
+    const minutes = Math.floor(timeRemaining / 60);
+    const seconds = timeRemaining % 60;
+    document.getElementById('timerDisplay').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function startTimer() {
+    if (!isRunning) {
+        const workDuration = parseInt(document.getElementById('workDuration').value);
+        timeRemaining = workDuration * 60;
+        isBreak = false;
+        isRunning = true;
+        document.getElementById('sessionType').textContent = 'Work Session';
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('pauseBtn').disabled = false;
+        document.getElementById('breakBtn').disabled = true;
+        
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            updateDisplay();
+            
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('sessionType').textContent = 'Session Complete!';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('breakBtn').disabled = false;
+                isRunning = false;
+                alert('Work session complete! Take a break.');
+            }
+        }, 1000);
+    }
+}
+
+function pauseTimer() {
+    if (isRunning) {
+        clearInterval(timerInterval);
+        isRunning = false;
+        document.getElementById('pauseBtn').textContent = 'Resume';
+    } else {
+        timerInterval = setInterval(() => {
+            timeRemaining--;
+            updateDisplay();
+            
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                document.getElementById('sessionType').textContent = 'Session Complete!';
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                document.getElementById('breakBtn').disabled = false;
+                isRunning = false;
+            }
+        }, 1000);
+        isRunning = true;
+        document.getElementById('pauseBtn').textContent = 'Pause';
+    }
+}
+
+function resetTimer() {
+    clearInterval(timerInterval);
+    const workDuration = parseInt(document.getElementById('workDuration').value);
+    timeRemaining = workDuration * 60;
+    isRunning = false;
+    isBreak = false;
+    document.getElementById('sessionType').textContent = 'Ready to Start';
+    document.getElementById('startBtn').disabled = false;
+    document.getElementById('pauseBtn').disabled = true;
+    document.getElementById('breakBtn').disabled = true;
+    document.getElementById('pauseBtn').textContent = 'Pause';
+    updateDisplay();
+}
+
+function startBreak() {
+    const breakDuration = parseInt(document.getElementById('breakDuration').value);
+    timeRemaining = breakDuration * 60;
+    isBreak = true;
+    isRunning = true;
+    document.getElementById('sessionType').textContent = 'Break Time';
+    document.getElementById('startBtn').disabled = true;
+    document.getElementById('pauseBtn').disabled = false;
+    document.getElementById('breakBtn').disabled = true;
+    
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        updateDisplay();
+        
+        if (timeRemaining <= 0) {
+            clearInterval(timerInterval);
+            document.getElementById('sessionType').textContent = 'Break Complete!';
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            document.getElementById('breakBtn').disabled = true;
+            isRunning = false;
+            alert('Break complete! Ready for next session.');
+        }
+    }, 1000);
+}
+
+updateDisplay();
+</script>
+</body>
+</html>
+

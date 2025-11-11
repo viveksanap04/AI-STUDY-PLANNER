@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Study Goals - AI Study Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">AI Study Planner</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>Create New Goal</h5>
+                </div>
+                <div class="card-body">
+                    <form id="goalForm">
+                        <div class="mb-3">
+                            <label class="form-label">Goal Title</label>
+                            <input type="text" class="form-control" id="goalTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" id="goalDescription" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Target Date</label>
+                            <input type="date" class="form-control" id="targetDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Target Hours</label>
+                            <input type="number" class="form-control" id="targetHours" step="0.5" min="0">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create Goal</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>My Goals</h5>
+                </div>
+                <div class="card-body">
+                    <div id="goalsList">
+                        {% if goals %}
+                            {% for goal in goals %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ goal.get('title', 'Untitled') }}</h6>
+                                    <p class="card-text">{{ goal.get('description', '') }}</p>
+                                    <div class="progress mb-2">
+                                        <div class="progress-bar" style="width: {{ (goal.get('current_progress', 0) / goal.get('target_hours', 1) * 100) if goal.get('target_hours', 0) > 0 else 0 }}%"></div>
+                                    </div>
+                                    <small class="text-muted">
+                                        Progress: {{ goal.get('current_progress', 0) }} / {{ goal.get('target_hours', 0) }} hours
+                                    </small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No goals yet. Create your first goal!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('goalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const goal = {
+        title: document.getElementById('goalTitle').value,
+        description: document.getElementById('goalDescription').value,
+        target_date: document.getElementById('targetDate').value,
+        target_hours: parseFloat(document.getElementById('targetHours').value) || 0
+    };
+    
+    fetch('/api/goals/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(goal)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Goal created successfully!');
+        location.reload();
+    });
+});
+</script>
+</body>
+</html>
+

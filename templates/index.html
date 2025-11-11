@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Study Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">AI Study Planner</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('upload') }}">Upload Syllabus</a></li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="membersDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+            Members
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="membersDropdown">
+            <li><h6 class="dropdown-header">Team Members</h6></li>
+            <li><a class="dropdown-item" href="#">Vivek - Frontend Developer</a></li>
+            <li><a class="dropdown-item" href="#">Varad - Backend Developer</a></li>
+            <li><a class="dropdown-item" href="#">Swapnil - AI Developer</a></li>
+            <li><a class="dropdown-item" href="#">Abhijeet - Backend Developer</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+  <div class="text-center mb-5">
+    <h1>Welcome to the AI Study Planner</h1>
+    <p class="text-muted">Upload your syllabus and get a personalized plan with advanced features.</p>
+    <a href="{{ url_for('upload') }}" class="btn btn-primary btn-lg mt-3">Get Started</a>
+  </div>
+
+  <!-- Enhanced Features -->
+  <div class="row mb-5">
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-calendar-week text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Smart Calendar</h5>
+          <p class="card-text">Intelligent scheduling with calendar integration</p>
+          <a href="{{ url_for('calendar_view') }}" class="btn btn-outline-primary">View Calendar</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-graph-up text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Progress Tracking</h5>
+          <p class="card-text">Track your study progress with detailed analytics</p>
+          <a href="{{ url_for('progress_dashboard') }}" class="btn btn-outline-primary">View Progress</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-tags text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Topic Management</h5>
+          <p class="card-text">Advanced categorization and topic management</p>
+          <a href="{{ url_for('topics_management') }}" class="btn btn-outline-primary">Manage Topics</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-bar-chart text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Analytics</h5>
+          <p class="card-text">Detailed analytics and performance insights</p>
+          <a href="{{ url_for('analytics_dashboard') }}" class="btn btn-outline-primary">View Analytics</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-clock text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Pomodoro Timer</h5>
+          <p class="card-text">Focus timer with work and break sessions</p>
+          <a href="{{ url_for('pomodoro_timer_page') }}" class="btn btn-outline-primary">Start Timer</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-journal-text text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Study Notes</h5>
+          <p class="card-text">Take and organize study notes by topic</p>
+          <a href="{{ url_for('notes_page') }}" class="btn btn-outline-primary">View Notes</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-card-text text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Flashcards</h5>
+          <p class="card-text">Generate and study with interactive flashcards</p>
+          <a href="{{ url_for('flashcards_page') }}" class="btn btn-outline-primary">Study Cards</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-bullseye text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Study Goals</h5>
+          <p class="card-text">Set and track your study goals</p>
+          <a href="{{ url_for('goals_page') }}" class="btn btn-outline-primary">View Goals</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-calendar-x text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Deadlines</h5>
+          <p class="card-text">Manage exam and assignment deadlines</p>
+          <a href="{{ url_for('deadlines_page') }}" class="btn btn-outline-primary">View Deadlines</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-fire text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Study Streak</h5>
+          <p class="card-text">Track your consecutive study days</p>
+          <a href="{{ url_for('streak_page') }}" class="btn btn-outline-primary">View Streak</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-download text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">Export Data</h5>
+          <p class="card-text">Export schedules and progress reports</p>
+          <a href="{{ url_for('export_page') }}" class="btn btn-outline-primary">Export</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 mb-3">
+      <div class="card h-100 text-center">
+        <div class="card-body">
+          <i class="bi bi-lightbulb text-primary" style="font-size: 2rem;"></i>
+          <h5 class="card-title mt-3">AI Recommendations</h5>
+          <p class="card-text">Get personalized study recommendations</p>
+          <a href="{{ url_for('recommendations_page') }}" class="btn btn-outline-primary">Get Recommendations</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

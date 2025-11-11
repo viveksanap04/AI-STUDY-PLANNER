@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Flashcards - AI Study Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .flashcard {
+            width: 100%;
+            height: 300px;
+            perspective: 1000px;
+            margin: 20px auto;
+        }
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .flashcard.flipped .flashcard-inner {
+            transform: rotateY(180deg);
+        }
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .flashcard-front {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .flashcard-back {
+            background-color: #198754;
+            color: white;
+            transform: rotateY(180deg);
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">AI Study Planner</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>Generate Flashcards</h5>
+                </div>
+                <div class="card-body">
+                    <form id="generateForm">
+                        <div class="mb-3">
+                            <label class="form-label">Topic</label>
+                            <select class="form-select" id="topicSelect" required>
+                                <option value="">Select a topic</option>
+                                {% for topic in topics %}
+                                <option value="{{ topic.get('name', '') }}">{{ topic.get('name', '') }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of Cards</label>
+                            <input type="number" class="form-control" id="cardCount" value="5" min="1" max="10">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Generate Flashcards</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>Study Flashcards</h5>
+                </div>
+                <div class="card-body">
+                    <div id="flashcardContainer">
+                        <div class="flashcard" id="currentCard" onclick="flipCard()">
+                            <div class="flashcard-inner">
+                                <div class="flashcard-front">
+                                    <h3>Click to generate flashcards</h3>
+                                </div>
+                                <div class="flashcard-back">
+                                    <h3>Answer will appear here</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-success me-2" onclick="markCorrect()">Correct</button>
+                            <button class="btn btn-danger" onclick="markIncorrect()">Incorrect</button>
+                            <button class="btn btn-primary ms-2" onclick="nextCard()">Next Card</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentFlashcards = [];
+let currentIndex = 0;
+
+document.getElementById('generateForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const topicName = document.getElementById('topicSelect').value;
+    const count = parseInt(document.getElementById('cardCount').value);
+    
+    fetch('/api/flashcards/generate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({topic_name: topicName, count: count})
+    })
+    .then(response => response.json())
+    .then(data => {
+        currentFlashcards = data.flashcards;
+        currentIndex = 0;
+        displayCard();
+    });
+});
+
+function displayCard() {
+    if (currentFlashcards.length === 0) return;
+    const card = currentFlashcards[currentIndex];
+    document.querySelector('.flashcard-front h3').textContent = card.question;
+    document.querySelector('.flashcard-back h3').textContent = card.answer;
+    document.getElementById('currentCard').classList.remove('flipped');
+}
+
+function flipCard() {
+    document.getElementById('currentCard').classList.toggle('flipped');
+}
+
+function markCorrect() {
+    if (currentFlashcards.length === 0) return;
+    const card = currentFlashcards[currentIndex];
+    fetch('/api/flashcards/study', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({flashcard: card, was_correct: true})
+    });
+    nextCard();
+}
+
+function markIncorrect() {
+    if (currentFlashcards.length === 0) return;
+    const card = currentFlashcards[currentIndex];
+    fetch('/api/flashcards/study', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({flashcard: card, was_correct: false})
+    });
+    nextCard();
+}
+
+function nextCard() {
+    currentIndex = (currentIndex + 1) % currentFlashcards.length;
+    displayCard();
+}
+</script>
+</body>
+</html>
+

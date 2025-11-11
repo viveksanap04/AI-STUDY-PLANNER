@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Topics Management - AI Study Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .topics-container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px 0;
+        }
+        .topics-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        .category-header {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0 10px 0;
+        }
+        .topic-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+        .topic-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .difficulty-badge {
+            font-size: 0.8em;
+        }
+        .priority-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        .priority-1 { background-color: #dc3545; }
+        .priority-2 { background-color: #fd7e14; }
+        .priority-3 { background-color: #ffc107; }
+        .priority-4 { background-color: #20c997; }
+        .priority-5 { background-color: #198754; }
+        .stats-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin: 10px 0;
+        }
+        .filter-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body class="topics-container">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="topics-card">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h1 class="text-primary">
+                            <i class="bi bi-tags"></i> Topics Management
+                        </h1>
+                        <div>
+                            <span class="badge bg-primary fs-6">Total: {{ total_topics }} topics</span>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h4>{{ topics_by_category.keys() | list | length }}</h4>
+                                <p class="mb-0">Categories</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h4>{{ topics_by_category.values() | map('length') | sum }}</h4>
+                                <p class="mb-0">Total Topics</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h4>{{ "%.1f"|format(topics_by_category.values() | map('length') | sum / topics_by_category.keys() | list | length) }}</h4>
+                                <p class="mb-0">Avg per Category</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h4>{{ topics_by_category.values() | map('length') | max }}</h4>
+                                <p class="mb-0">Max in Category</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="filter-section">
+                        <h5>Filter Topics</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Category</label>
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="">All Categories</option>
+                                    {% for category in topics_by_category.keys() %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Difficulty</label>
+                                <select class="form-select" id="difficultyFilter">
+                                    <option value="">All Difficulties</option>
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Priority</label>
+                                <select class="form-select" id="priorityFilter">
+                                    <option value="">All Priorities</option>
+                                    <option value="1">Priority 1 (Highest)</option>
+                                    <option value="2">Priority 2</option>
+                                    <option value="3">Priority 3</option>
+                                    <option value="4">Priority 4</option>
+                                    <option value="5">Priority 5 (Lowest)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Sort By</label>
+                                <select class="form-select" id="sortFilter">
+                                    <option value="name">Name</option>
+                                    <option value="difficulty">Difficulty</option>
+                                    <option value="priority">Priority</option>
+                                    <option value="hours">Study Hours</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topics by Category -->
+                    {% for category, topics in topics_by_category.items() %}
+                    <div class="category-section" data-category="{{ category }}">
+                        <div class="category-header">
+                            <h3>
+                                <i class="bi bi-folder"></i> {{ category }}
+                                <span class="badge bg-light text-dark ms-2">{{ topics | length }} topics</span>
+                            </h3>
+                        </div>
+
+                        <div class="row">
+                            {% for topic in topics %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="topic-card" 
+                                     data-difficulty="{{ topic.difficulty }}" 
+                                     data-priority="{{ topic.priority }}"
+                                     data-hours="{{ topic.estimated_hours }}"
+                                     data-name="{{ topic.name }}">
+                                    
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">{{ topic.name }}</h6>
+                                        <span class="priority-indicator priority-{{ topic.priority }}"></span>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <span class="badge bg-secondary difficulty-badge">{{ topic.difficulty }}</span>
+                                        <span class="badge bg-info difficulty-badge">{{ topic.subcategory }}</span>
+                                    </div>
+                                    
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <i class="bi bi-clock"></i> {{ topic.estimated_hours }} hours
+                                        </small>
+                                        <br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-star"></i> Priority {{ topic.priority }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="progress mb-2" style="height: 5px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ topic.confidence * 100 }}%"
+                                             aria-valuenow="{{ topic.confidence * 100 }}" 
+                                             aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Confidence: {{ "%.1f"|format(topic.confidence * 100) }}%</small>
+                                    
+                                    <div class="mt-3">
+                                        <button class="btn btn-sm btn-outline-primary me-1" 
+                                                onclick="getRecommendations({{ loop.index }})">
+                                            <i class="bi bi-lightbulb"></i> Tips
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-success me-1" 
+                                                onclick="startStudySession('{{ topic.name }}')">
+                                            <i class="bi bi-play"></i> Study
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-info" 
+                                                onclick="viewDetails('{{ topic.name }}')">
+                                            <i class="bi bi-info-circle"></i> Details
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <!-- Study Recommendations Modal -->
+                    <div class="modal fade" id="recommendationsModal" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Study Recommendations</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body" id="recommendationsContent">
+                                    <!-- Recommendations will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Topic Details Modal -->
+                    <div class="modal fade" id="topicDetailsModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Topic Details</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body" id="topicDetailsContent">
+                                    <!-- Topic details will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation -->
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('calendar_view') }}" class="btn btn-outline-primary me-2">
+                            <i class="bi bi-calendar-week"></i> Calendar
+                        </a>
+                        <a href="{{ url_for('progress_dashboard') }}" class="btn btn-outline-info me-2">
+                            <i class="bi bi-graph-up"></i> Progress
+                        </a>
+                        <a href="{{ url_for('analytics_dashboard') }}" class="btn btn-outline-success me-2">
+                            <i class="bi bi-bar-chart"></i> Analytics
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-house"></i> Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Filter functionality
+        function filterTopics() {
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            const difficultyFilter = document.getElementById('difficultyFilter').value;
+            const priorityFilter = document.getElementById('priorityFilter').value;
+            const sortFilter = document.getElementById('sortFilter').value;
+
+            const categorySections = document.querySelectorAll('.category-section');
+            
+            categorySections.forEach(section => {
+                const category = section.dataset.category;
+                const topicCards = section.querySelectorAll('.topic-card');
+                
+                // Filter by category
+                if (categoryFilter && category !== categoryFilter) {
+                    section.style.display = 'none';
+                    return;
+                } else {
+                    section.style.display = 'block';
+                }
+                
+                // Filter topics within category
+                topicCards.forEach(card => {
+                    const difficulty = card.dataset.difficulty;
+                    const priority = card.dataset.priority;
+                    
+                    let show = true;
+                    
+                    if (difficultyFilter && difficulty !== difficultyFilter) {
+                        show = false;
+                    }
+                    
+                    if (priorityFilter && priority !== priorityFilter) {
+                        show = false;
+                    }
+                    
+                    card.style.display = show ? 'block' : 'none';
+                });
+                
+                // Sort topics
+                const visibleCards = Array.from(topicCards).filter(card => card.style.display !== 'none');
+                visibleCards.sort((a, b) => {
+                    switch(sortFilter) {
+                        case 'name':
+                            return a.dataset.name.localeCompare(b.dataset.name);
+                        case 'difficulty':
+                            const difficultyOrder = {'Easy': 1, 'Medium': 2, 'Hard': 3};
+                            return difficultyOrder[a.dataset.difficulty] - difficultyOrder[b.dataset.difficulty];
+                        case 'priority':
+                            return parseInt(a.dataset.priority) - parseInt(b.dataset.priority);
+                        case 'hours':
+                            return parseFloat(a.dataset.hours) - parseFloat(b.dataset.hours);
+                        default:
+                            return 0;
+                    }
+                });
+                
+                // Reorder DOM elements
+                const container = section.querySelector('.row');
+                visibleCards.forEach(card => {
+                    container.appendChild(card.parentElement);
+                });
+            });
+        }
+
+        // Event listeners for filters
+        document.getElementById('categoryFilter').addEventListener('change', filterTopics);
+        document.getElementById('difficultyFilter').addEventListener('change', filterTopics);
+        document.getElementById('priorityFilter').addEventListener('change', filterTopics);
+        document.getElementById('sortFilter').addEventListener('change', filterTopics);
+
+        // Get recommendations
+        function getRecommendations(topicIndex) {
+            // Mock recommendations - in production, this would call the API
+            const recommendations = [
+                "Break this topic into smaller subtopics",
+                "Allocate extra study time",
+                "Consider finding additional resources",
+                "Schedule this topic early in your study plan",
+                "Review multiple times before exams"
+            ];
+            
+            const modal = new bootstrap.Modal(document.getElementById('recommendationsModal'));
+            document.getElementById('recommendationsContent').innerHTML = 
+                '<ul class="list-group">' +
+                recommendations.map(rec => `<li class="list-group-item">${rec}</li>`).join('') +
+                '</ul>';
+            modal.show();
+        }
+
+        // Start study session
+        function startStudySession(topicName) {
+            alert(`Starting study session for: ${topicName}`);
+            // Redirect to progress tracking or start session
+            window.location.href = '/progress';
+        }
+
+        // View topic details
+        function viewDetails(topicName) {
+            const modal = new bootstrap.Modal(document.getElementById('topicDetailsModal'));
+            document.getElementById('topicDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Topic Information</h6>
+                        <p><strong>Name:</strong> ${topicName}</p>
+                        <p><strong>Category:</strong> Programming</p>
+                        <p><strong>Difficulty:</strong> Medium</p>
+                        <p><strong>Estimated Hours:</strong> 2.5</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Study Progress</h6>
+                        <div class="progress mb-2">
+                            <div class="progress-bar" role="progressbar" style="width: 30%"></div>
+                        </div>
+                        <p><strong>Progress:</strong> 30%</p>
+                        <p><strong>Time Spent:</strong> 45 minutes</p>
+                    </div>
+                </div>
+            `;
+            modal.show();
+        }
+    </script>
+</body>
+</html>
+

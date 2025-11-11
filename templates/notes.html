@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Study Notes - AI Study Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{{ url_for('index') }}">AI Study Planner</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('index') }}">Home</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5>Create New Note</h5>
+                </div>
+                <div class="card-body">
+                    <form id="noteForm">
+                        <div class="mb-3">
+                            <label class="form-label">Topic</label>
+                            <select class="form-select" id="topicSelect" required>
+                                <option value="">Select a topic</option>
+                                {% for topic in topics %}
+                                <option value="{{ topic.get('name', '') }}">{{ topic.get('name', '') }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <input type="text" class="form-control" id="noteTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Content</label>
+                            <textarea class="form-control" id="noteContent" rows="10" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Note</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5>My Notes</h5>
+                    <input type="text" class="form-control w-auto" id="searchNotes" placeholder="Search notes...">
+                </div>
+                <div class="card-body">
+                    <div id="notesList">
+                        {% if notes %}
+                            {% for note in notes %}
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ note.get('title', 'Untitled') }}</h6>
+                                    <p class="card-text">{{ note.get('preview', note.get('content', '')) }}</p>
+                                    <small class="text-muted">{{ note.get('created_at', '') }}</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">No notes yet. Create your first note!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('noteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const note = {
+        topic_id: document.getElementById('topicSelect').value,
+        title: document.getElementById('noteTitle').value,
+        content: document.getElementById('noteContent').value
+    };
+    
+    fetch('/api/notes/create', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(note)
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Note saved successfully!');
+        location.reload();
+    });
+});
+</script>
+</body>
+</html>
+
