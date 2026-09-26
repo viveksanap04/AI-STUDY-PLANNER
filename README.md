@@ -20,7 +20,7 @@ Our mission is to remove the stress of manual planning and help students build c
 ---
 
 ##  Video Explanation
-👉 [Click here to watch the project walkthrough video]https://drive.google.com/file/d/1JtjUFm0z1JoPtQdX6HzAEomDywbVcx3T/view?usp=drivesdk
+#havent added yet
 
 ---
 
